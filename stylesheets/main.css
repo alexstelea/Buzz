@@ -1,0 +1,132 @@
+html {
+     font-family: helvetica, arial;
+}
+
+.bar {
+     float: left;
+     margin: 5px;
+}
+
+.foo {
+    background-image: url('/images/teams.png');
+    background-position-y: bottom;
+    background-repeat: no-repeat;
+    background-size: 726;
+    width: 118px;
+    height: 400px;
+    position: relative;
+}
+
+#t2 .foo {
+    background-position-x: -118;
+}
+
+#t3 .foo {
+    background-position-x: -236;
+}
+
+#t4 .foo {
+    background-position-x: -354;
+}
+
+#t5 .foo {
+    background-position-x: -472;
+}
+
+#t6 .foo {
+    background-position-x: -590;
+}
+
+.footer {
+    padding: 10px;
+    text-align: center;
+    width:770px;
+}
+
+.footer a {
+    color: #343434;
+    font-size: smaller;
+    text-decoration: none;
+    display: inline-block;
+    padding: 5px;
+}
+
+.content {
+    width: 770px;
+    text-align: center;
+}
+
+#welcome {
+    height: 20px;
+    width: 300px;
+    position: relative;
+    left: -170px;
+    text-transform: uppercase;
+    font-size: bigger;
+    font-weight: bold
+}
+
+#welcome div {
+    -webkit-transform: rotate(-90deg); 
+}
+
+.canvas {
+    margin: 0 auto;
+    width: 850px;
+}
+
+.prog {
+      border: 1px solid #4B4B4B;
+      height:20px;
+      width:114px;
+      margin: 2px;
+      position: absolute;
+      bottom: 60px;
+      overflow:hidden;
+}
+
+.move {
+  color: #EB491B;
+}
+
+.sleep {
+  color: #531AC5;
+}
+
+.total {
+  border-top: 2px solid #454545;
+  color: #454545;
+}
+
+.divider {
+  background-color: #454545;
+  height:2px;
+}
+
+.stat {
+  float: right;
+  position: relative;
+  width: 100px;
+  padding: 45px 5px 0px 5px;
+  margin-left: 10px;
+}
+
+.measure {
+font-family: "HelveticaNeue-CondensedBold", "Helvetica Neue";
+font-size: 26pt;
+line-height: 45px;
+position: absolute;
+width:90px;
+text-align: right;
+left: 5px;
+top: 0px;
+}
+
+.label {
+  font-size: 8pt;
+  display: block;
+  position: absolute;
+  right: -5px;
+  top: 15px;
+  -webkit-transform: rotate(-90deg);
+}
