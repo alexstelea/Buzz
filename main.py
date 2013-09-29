@@ -21,6 +21,7 @@ import logging
 import json
 
 from google.appengine.ext import ndb
+
 # tools for encryption
 
 app_name = "Buzz"
@@ -87,6 +88,7 @@ class MainHandler(webapp2.RequestHandler):
   <link href="/stylesheets/main.css" media="screen" rel="stylesheet" type="text/css"/>
   <link href="/stylesheets/bootstrap.css" rel="stylesheet">
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
 
   <script src="/js/lastfm.js"></script>
   <script src="/js/lastfm.api.md5.js"></script>
@@ -95,7 +97,11 @@ class MainHandler(webapp2.RequestHandler):
   <script src="js/justgage.1.0.1.min.js"></script>
 
   <script src="js/popup.js"></script>
+
   <script>
+    
+
+
   Raphael.fn.drawGrid = function (x, y, w, h, wv, hv, color) {
             color = "rgba(0,0,0,0.1)";
             var path = ["M", Math.round(x) + .5, Math.round(y) + .5, "L", Math.round(x + w) + .5, Math.round(y) + .5, Math.round(x + w) + .5, Math.round(y + h) + .5, Math.round(x) + .5, Math.round(y + h) + .5, Math.round(x) + .5, Math.round(y) + .5],
@@ -179,14 +185,7 @@ class MainHandler(webapp2.RequestHandler):
             label.push(r.text(60, 12, "24 hits").attr(txt3));
             label.push(r.text(60, 27, "22 September 2008").attr(txt1).attr({fill: color}));
             label.hide();
-            label2 = r.set()
-            label2.push(r.text(30, 45, "Teacher").attr(txt1).attr({fill: color}));
-            label2.push(r.text(30, 57, "Training").attr(txt1).attr({fill: color}));
-            label2.push(r.text(625, 8, "Educational").attr(txt1).attr({fill: color}));
-            label2.push(r.text(625, 20, "Materials").attr(txt1).attr({fill: color}));
-            label2.push(r.text(425, 33, "Increase Education").attr(txt1).attr({fill: color}));
-            label2.push(r.text(425, 45, "Expenses").attr(txt1).attr({fill: color}));
-
+            
             var frame = r.popup(100, 100, label, "right").attr({fill: "#000", stroke: "#666", "stroke-width": 2, "fill-opacity": .7}).hide();
 
             var p, bgpp;
@@ -317,32 +316,12 @@ rect.a {
 
   <div class="graph-container">
     <table id="data">
-                <h4 style="margin-bottom: 0px; margin-top: 70px;" align="center"></h4>    
+                <h4 style="margin-bottom: 0px; margin-top: 70px;" align="center">Historic Stress Diagram</h4>    
                     <tfoot>
                         <tr>
-                            <th>1990</th>
-                            <th>1991</th>
-                            <th>1992</th>
-                            <th>1993</th>
-                            <th>1994</th>
-                            <th>1995</th>
-                            <th>1996</th>
-                            <th>1997</th>
-                            <th>1998</th>
-                            <th>1999</th>
-                            <th>2000</th>
-                            <th>2001</th>
-                            <th>2002</th>
-                            <th>2003</th>
-                            <th>2004</th>
-                            <th>2005</th>
-                            <th>2006</th>
-                            <th>2007</th>
-                            <th>2008</th>
-                            <th>2009</th>
-                            <th>2010</th>
-                            <th>2011</th>              
-                            
+                            <th>9/27/2013</th>
+                            <th>9/28/2013</th>
+                            <th>9/29/2013</th>
                         </tr>
                     </tfoot>
                     <tbody>
@@ -350,25 +329,6 @@ rect.a {
                             <td>75.06</td>
                             <td>79.76</td>
                             <td>81.71</td>
-                            <td>83.56</td>
-                            <td>82.02</td>
-                            <td>80.60</td>
-                            <td>81.57</td>
-                            <td>81.57</td>
-                            <td>81.57</td>
-                            <td>81.46</td>
-                            <td>86.92</td>
-                            <td>90.55</td>
-                            <td>93.33</td>
-                            <td>93.33</td>
-                            <td>94.87</td>
-                            <td>94.17</td>
-                            <td>90.47</td>
-                            <td>92.39</td>
-                            <td>93.67</td>
-                            <td>96.32</td>
-                            <td>96.28</td>
-                            <td>99.09</td>
                         </tr>
                     </tbody>
                 </table>   
@@ -439,8 +399,7 @@ musicscore = function(data){
 }
 
 calendar_score = function(data){
-  abs = 5;
-
+  return 30;
 }
 
 
@@ -449,12 +408,10 @@ fetch_team = function(tid) {
 
 $.get('/teamscore?tid='+tid, function(data) {
 
-  console.log(data);
-
   
   var g = new JustGage({
     id: "gauge", 
-    value: musicscore(data), 
+    value: 50, 
     min: 0,
     max: 100,
     title: "Stress Score"
@@ -483,7 +440,7 @@ $.get('/teamscore?tid='+tid, function(data) {
     });  
   var g = new JustGage({
       id: "calendar-gauge", 
-      value: 92, 
+      value: calendar_score(data), 
       min: 0,
       max: 100,
       title: "Schedule Score"
@@ -505,7 +462,7 @@ animate_bar = function(sel) {
 }
 
 $(document).ready(function() {
-
+  
   fetch_team('XkPN_Wb3hGwgc7ZHX4ErSQ');
   
 

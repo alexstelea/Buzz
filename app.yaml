@@ -21,6 +21,9 @@ handlers:
 - url: .*
   script: main.app
 
+- url: /fullcalendar
+  static_dir: fullcalendar
+
 libraries:
 - name: webapp2
   version: "2.5.2"
