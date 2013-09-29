@@ -88,7 +88,6 @@ class MainHandler(webapp2.RequestHandler):
   <link href="/stylesheets/main.css" media="screen" rel="stylesheet" type="text/css"/>
   <link href="/stylesheets/bootstrap.css" rel="stylesheet">
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
-<script type="text/javascript" src="http://www.google.com/jsapi"></script>
 
   <script src="/js/lastfm.js"></script>
   <script src="/js/lastfm.api.md5.js"></script>
@@ -100,7 +99,6 @@ class MainHandler(webapp2.RequestHandler):
 
   <script>
     
-
 
   Raphael.fn.drawGrid = function (x, y, w, h, wv, hv, color) {
             color = "rgba(0,0,0,0.1)";
@@ -155,7 +153,7 @@ class MainHandler(webapp2.RequestHandler):
             });
             
             // Draw
-            var width = $("#holder").width() - 80,
+            var width = $("#holder").width(),
                 height = 250,
                 leftgutter = 0,
                 bottomgutter = 20,
@@ -295,7 +293,7 @@ rect.a {
   <div class="row">
     <div class="span6" style="margin-left: 40px;"">
     <h4>Your Daily Event Stress Score: 92%</h4>
-      <ul>
+      <ul id="daily">
         <li>Exams: 3 scheduled today from 2PM-5PM</li>
         <li>Meetings: 2 Group Meetings today from 6PM-8PM</li>
       </ul>
