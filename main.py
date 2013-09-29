@@ -108,8 +108,8 @@ class MainHandler(webapp2.RequestHandler):
     </ul>
   </div>
 </div>
-<div class="container">
 
+<div class="container">
 
   <div class="table well offset0">
 
@@ -306,6 +306,28 @@ class TeamHandler(MainHandler):
         up_user = up.read(token, 'users/@me')
 
         up_moves = up.read(token, 'users/@me/moves')
+# Misha Wrote This part lolollol
+        up_time_completed = up.time_completed('users/@me/time') #how much sleep they got 
+        month_sleep =[]
+        
+        while len(month_sleep)<=30:
+          if len(month_sleep) != 30:
+            month_sleep = month_sleep.append(up_time_completed)
+            average_sleep = sum(month_sleep)/ len(month_sleep)
+            print("hiii")
+            print(average_sleep)
+          else:
+            month_sleep = month_sleep[1:]
+            up_time_completed = up.time_completed('users/@me/time')
+            month_sleep = month_sleep.append(up_time_completed)
+            print("your average sleep is", average_sleep)
+
+        
+        # mean = sum(mouth_sleep, 0.0) / len(scorenum)
+        # d = [ (i - mean) ** 2 for i in scorenum]
+        # std_dev = math.sqrt(sum(d) / len(d))
+
+
 
         self.response.headers['Content-Type'] = 'text/html'
         self.response.write('''
