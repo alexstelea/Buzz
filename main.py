@@ -376,19 +376,33 @@ move_score = function(data) {
 
 sleep_score = function(data) {
 
-  a = 25920/3600;
+  a = 25920/3600; 
 
   h = data['sleep'] / 3600;
 
-  s = 1.01;
+  s = 200;
 
   mh = (h-a)/s;
 
   if (mh < 0){
-    return Math.abs(mh);
+    mh= Math.abs(mh);
   }
   else{
-    return 0.25 * mh;
+    mh = 0.25 * mh;
+
+  whenSleptAvg = 82800;
+  timeSlept = 36000;
+  stdT = 200;
+  mT = (timeSlept - whenSleptAvg)/stdT;
+
+
+  sleepEff = (data[''] + s_deep) /(s_light+ s_deep+ s_awake)
+
+
+
+
+
+
   }
 }
 
@@ -493,6 +507,9 @@ class TeamScoreHandler(MainHandler):
         try:
           up_sleep = up.read(token, 'users/@me/sleeps')
           sleeps_total = up_sleep['data']['items'][0]['details']['duration']
+          sleep_main = up_sleep['data']['items'][0]['details'],
+
+
         except:
           logging.error('could not fetch sleep for user %s' % user)
         
@@ -508,7 +525,8 @@ class TeamScoreHandler(MainHandler):
           'team' : tid,
           'move_cnt' : move_cnt,
           'steps' : steps_total,
-          'sleep' : sleeps_total
+          'sleep' : sleeps_total,
+          'sleep_main' : sleep_main,
           }
 
     def get(self):
