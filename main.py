@@ -275,15 +275,15 @@ rect.a {
     <a class="brand" href="#">Title</a>
     <ul class="nav">
       <li class="active"><a href="#">Home</a></li>
-      <li><a href="#">Link</a></li>
-      <li><a href="#">Link</a></li>
+      <li><a href="/connect">Login</a></li>
+      <li><a href="/signout">Logout</a></li>
     </ul>
   </div>
 </div>
 <div class="container">
 
 
-  <div class="table well offset0">
+  <div class="table well span12">
     <div id="gauge" style="display: block; margin: 0 auto; width:400px; height:320px"></div>
     <div style="width: 800px; margin-top: 50px;  margin: 0 auto; height: 200px;">
       <div id="song-gauge" style="position: relative; float: left; width:200px; height:160px"></div>  
@@ -291,14 +291,33 @@ rect.a {
       <div id="activity-gauge" style="position: relative; float: left; width:200px; height:160px"></div> 
       <div id="calendar-gauge" style="position: relative; float: left; width:200px; height:160px"></div>
     </div>
-     
-
-
-
   </div>
 
-  <table id="data">
-                <h4 style="margin-bottom: 0px; margin-top: 70px;" align="center">Primary School Completion Rate</h4>    
+  <div class="row">
+    <div class="span6" style="margin-left: 40px;"">
+    <h4>Your Daily Event Stress Score: 92%</h4>
+      <ul>
+        <li>Exams: 3 scheduled today from 2PM-5PM</li>
+        <li>Meetings: 2 Group Meetings today from 6PM-8PM</li>
+      </ul>
+    </div>
+    <div class="span5">
+    <h4>Your Music Score: 92%</h4>
+      <ul>
+        <li>You listened to your old songs</li>
+        <li>Here is some suggested music to help you rewind:</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="span12">
+
+      <p> Stress is very very very very very very very very very bad </p>
+  </div>
+
+  <div class="graph-container">
+    <table id="data">
+                <h4 style="margin-bottom: 0px; margin-top: 70px;" align="center"></h4>    
                     <tfoot>
                         <tr>
                             <th>1990</th>
@@ -353,9 +372,9 @@ rect.a {
                         </tr>
                     </tbody>
                 </table>   
-                <div id="holder"></div>
 
-  <h2 class="span10">Hello World</h2>
+                <div id="holder"></div>
+                </div>
 </div>
 </body>
 
@@ -398,29 +417,77 @@ move_score = function(data) {
 }
 
 sleep_score = function(data) {
-  if (data['sleep_cnt'] == 0) {
-    return 0;
+
+  a = 25920/3600;
+
+  h = data['sleep'] / 3600;
+
+  s = 1.01;
+
+  mh = (h-a)/s;
+
+  if (mh < 0){
+    return Math.abs(mh);
   }
-  return data['sleep']/data['sleep_cnt'];
+  else{
+    return 0.25 * mh;
+  }
 }
 
+musicscore = function(data){
+  
+}
+
+calendar_score = function(data){
+  abs = 5;
+
+}
 
 
 
 fetch_team = function(tid) {
 
 $.get('/teamscore?tid='+tid, function(data) {
-    console.log('af');
 
-  console.log(data['sleep_cnt']);
+  console.log(data);
+
   
   var g = new JustGage({
     id: "gauge", 
-    value: data['sleep_cnt'], 
+    value: musicscore(data), 
     min: 0,
     max: 100,
     title: "Stress Score"
   }); 
+
+  var g = new JustGage({
+      id: "song-gauge", 
+      value: 40, 
+      min: 0,
+      max: 100,
+      title: "Music Score"
+    });  
+  var g = new JustGage({
+      id: "sleep-gauge", 
+      value: sleep_score(data), 
+      min: 0,
+      max: 100,
+      title: "Sleep Score"
+    });  
+  var g = new JustGage({
+      id: "activity-gauge", 
+      value: 74, 
+      min: 0,
+      max: 100,
+      title: "Activity Score"
+    });  
+  var g = new JustGage({
+      id: "calendar-gauge", 
+      value: 92, 
+      min: 0,
+      max: 100,
+      title: "Schedule Score"
+    });  
 
 });
 
@@ -445,34 +512,7 @@ $(document).ready(function() {
 });
 
 
-var g = new JustGage({
-    id: "song-gauge", 
-    value: 40, 
-    min: 0,
-    max: 100,
-    title: "Song Score"
-  });  
-var g = new JustGage({
-    id: "sleep-gauge", 
-    value: 50, 
-    min: 0,
-    max: 100,
-    title: "Sleep Score"
-  });  
-var g = new JustGage({
-    id: "activity-gauge", 
-    value: 74, 
-    min: 0,
-    max: 100,
-    title: "Activity Score"
-  });  
-var g = new JustGage({
-    id: "calendar-gauge", 
-    value: 92, 
-    min: 0,
-    max: 100,
-    title: "Schedule Score"
-  });  
+
 
 </script>
 
@@ -486,39 +526,37 @@ class TeamScoreHandler(MainHandler):
     def _build_team(self, tid):
         up = self._up_provider()
         user = UserModel.query_xid(tid).fetch()
-        print 'alex'
+
+        token = self._token()
+        if not token:
+            self.redirect('/connect')
+            return
 
         move_cnt = 0
-        sleep_cnt = 0
         steps_total = 0
         sleeps_total = 0
-
         try:
-            up_sleeps = up.read(user.token, 'users/@me/sleeps')
-            for sleep in up_sleeps['data']['items']:
-                sleep_cnt += 1
-                sleeps_total += sleep['details']['duration']
+          up_sleep = up.read(token, 'users/@me/sleeps')
+          sleeps_total = up_sleep['data']['items'][0]['details']['duration']
         except:
-            logging.error('could not fetch sleeps for user %s' % user)
-
+          logging.error('could not fetch sleep for user %s' % user)
+        
         try:
-            up_moves = up.read(user.token, 'users/@me/moves')
-            for move in up_moves['data']['items']:
-                move_cnt += 1
-                steps_total += move['details']['steps']
+          up_moves = up.read(token, 'users/@me/moves')
+          for move in up_moves['data']['items']:
+              move_cnt += 1
+              steps_total += move['details']['steps']
         except:
-            logging.error('could not fetch moves for user %s' % user)
+          logging.error('could not fetch moves for user %s' % user)
 
         return {
-            'team' : tid,
-            'sleep_cnt' : sleep_cnt,
-            'move_cnt' : move_cnt,
-            'steps' : steps_total,
-            'sleep' : sleeps_total
-            }
+          'team' : tid,
+          'move_cnt' : move_cnt,
+          'steps' : steps_total,
+          'sleep' : sleeps_total
+          }
 
     def get(self):
-        print 'alex'
         tid = (cgi.escape(self.request.get('tid')))        
         self.response.headers['Content-Type'] = 'text/json'
         self.response.write(json.dumps(self._build_team(tid)))
@@ -547,7 +585,7 @@ class TeamHandler(MainHandler):
         month_sleep =[]
 
         for line in up_sleep['data']['items']:
-          month_sleep.append(line['details']['light'] * 1.5/line['details']['duration'])
+          month_sleep.append((line['details']['light'] * 1.5/line['details']['duration']) * 100)
 
 
         # while len(month_sleep)<=30:
