@@ -407,57 +407,20 @@ sleep_score = function(data) {
 
 
 
-fetch_team = function(tid, sel) {
+fetch_team = function(tid) {
 
 $.get('/teamscore?tid='+tid, function(data) {
-  var ms = move_score(data);
-  var ss = sleep_score(data);
-  var total_score = ms + ss/2;
-  var content = '';
+    console.log('af');
 
-  if (total_score == 0) {
-    return;
-  }
-
-  if (total_score > max) {
-     max = total_score;
-  }
-
-  content += '<div>';
-
-  content += '<div class="stats">';
-  content += '<div class="move stat">';
-  content += '<div class="measure">' + ms.toFixed(0) + '</div>';
-  content += '<div class="label">steps</div>';
-  content += '</div>';
-  content += '</div>';
+  console.log(data['sleep_cnt']);
   
-  content += '<div class="stats">';
-  content += '<div class="sleep stat">';
-  content += '<div class="measure">' + (ss/3600).toFixed(2) + '</div>';
-  content += '<div class="label">sleep</div>';
-  content += '</div>';
-  content += '</div>';
-
-  content += '<div class="stats">';
-  content += '<div class="total stat">';
-  content += '<div class="measure">' + total_score.toFixed(0) + '</div>';
-  content += '<div class="label">points</div>';
-  content += '</div>';
-  content += '</div>';
-
-  content += '</div>';
-  
-
-  $(sel).data('score', total_score);
-  $(sel).html(content);
-
-  animate_bar('#c1');
-  animate_bar('#c2');
-  animate_bar('#c3');
-  animate_bar('#c4');
-  animate_bar('#c5');
-  animate_bar('#c6');
+  var g = new JustGage({
+    id: "gauge", 
+    value: data['sleep_cnt'], 
+    min: 0,
+    max: 100,
+    title: "Stress Score"
+  }); 
 
 });
 
@@ -476,22 +439,11 @@ animate_bar = function(sel) {
 
 $(document).ready(function() {
 
-  fetch_team(1, '#c1');
-  fetch_team(2, '#c2');
-  fetch_team(3, '#c3');
-  fetch_team(4, '#c4');
-  fetch_team(5, '#c5');
-  fetch_team(6, '#c6');
+  fetch_team('XkPN_Wb3hGwgc7ZHX4ErSQ');
+  
 
 });
 
-var g = new JustGage({
-    id: "gauge", 
-    value: 67, 
-    min: 0,
-    max: 100,
-    title: "Stress Score"
-  });   
 
 var g = new JustGage({
     id: "song-gauge", 
@@ -533,35 +485,32 @@ class TeamScoreHandler(MainHandler):
         
     def _build_team(self, tid):
         up = self._up_provider()
-        users = UserModel.query_team(tid).fetch()
+        user = UserModel.query_xid(tid).fetch()
+        print 'alex'
 
         move_cnt = 0
         sleep_cnt = 0
         steps_total = 0
         sleeps_total = 0
 
-        for user in users:
-            times = {'start_time' : 1376028299, 'end_time' : 1376324710}
+        try:
+            up_sleeps = up.read(user.token, 'users/@me/sleeps')
+            for sleep in up_sleeps['data']['items']:
+                sleep_cnt += 1
+                sleeps_total += sleep['details']['duration']
+        except:
+            logging.error('could not fetch sleeps for user %s' % user)
 
-            try:
-                up_sleeps = up.read(user.token, 'users/@me/sleeps', times)
-                for sleep in up_sleeps['data']['items']:
-                    sleep_cnt += 1
-                    sleeps_total += sleep['details']['duration']
-            except:
-                logging.error('could not fetch sleeps for user %s' % user.xid)
-
-            try:
-                up_moves = up.read(user.token, 'users/@me/moves', times)
-                for move in up_moves['data']['items']:
-                    move_cnt += 1
-                    steps_total += move['details']['steps']
-            except:
-                logging.error('could not fetch moves for user %s' % user.xid)
+        try:
+            up_moves = up.read(user.token, 'users/@me/moves')
+            for move in up_moves['data']['items']:
+                move_cnt += 1
+                steps_total += move['details']['steps']
+        except:
+            logging.error('could not fetch moves for user %s' % user)
 
         return {
             'team' : tid,
-            'user_cnt' : len(users),
             'sleep_cnt' : sleep_cnt,
             'move_cnt' : move_cnt,
             'steps' : steps_total,
@@ -569,7 +518,8 @@ class TeamScoreHandler(MainHandler):
             }
 
     def get(self):
-        tid = int(cgi.escape(self.request.get('tid')))        
+        print 'alex'
+        tid = (cgi.escape(self.request.get('tid')))        
         self.response.headers['Content-Type'] = 'text/json'
         self.response.write(json.dumps(self._build_team(tid)))
 
@@ -589,6 +539,33 @@ class TeamHandler(MainHandler):
 
         up_moves = up.read(token, 'users/@me/moves')
 
+        # Misha Wrote This part lolollol
+
+        up_sleep = up.read(token, 'users/@me/sleeps')
+
+
+        month_sleep =[]
+
+        for line in up_sleep['data']['items']:
+          month_sleep.append(line['details']['light'] * 1.5/line['details']['duration'])
+
+
+        # while len(month_sleep)<=30:
+        #   if len(month_sleep) != 30:
+        #     month_sleep = month_sleep.append(up_time_completed)
+        #     average_sleep = sum(month_sleep)/ len(month_sleep)
+        #     print("hiii")
+        #     print(average_sleep)
+        #   else:
+        #     month_sleep = month_sleep[1:]
+        #     month_sleep = month_sleep.append(up_time_completed)
+        #     print("your average sleep is", average_sleep)
+
+        
+        # mean = sum(mouth_sleep, 0.0) / len(scorenum)
+        # d = [ (i - mean) ** 2 for i in scorenum]
+        # std_dev = math.sqrt(sum(d) / len(d))
+
         self.response.headers['Content-Type'] = 'text/html'
         self.response.write('''
 <html>
@@ -605,6 +582,12 @@ class TeamHandler(MainHandler):
 <br>
 <br >
 {moves}
+<br>
+<br>
+{len}
+<br>
+{moth}
+
 <a href="/signout">signout</a>
 
 <p>
@@ -612,7 +595,7 @@ class TeamHandler(MainHandler):
 </form>
 </div>
 </html>
-'''.format(first_name= up_user['data']['first'], dob=up_user['data'], moves = up_moves['data']['items']
+'''.format(first_name= up_user['data']['first'], dob=up_user['data'], len = len(up_sleep), moth=month_sleep, moves = up_sleep
  ))
 
 class TeamChooseHandler(MainHandler):
