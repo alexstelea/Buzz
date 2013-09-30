@@ -81,6 +81,7 @@ class MainHandler(webapp2.RequestHandler):
     def get(self):
 
         self.response.headers['Content-Type'] = 'text/html'
+
         self.response.write('''
 <html>
 <head>
@@ -155,7 +156,7 @@ class MainHandler(webapp2.RequestHandler):
             });
             
             // Draw
-            var width = $("#holder").width() - 80,
+            var width = $("#holder").width(),
                 height = 250,
                 leftgutter = 0,
                 bottomgutter = 20,
@@ -171,8 +172,11 @@ class MainHandler(webapp2.RequestHandler):
                 labels3 = r.set(),
                 max = Math.max.apply(Math, data),
                 Y = (height - bottomgutter - topgutter) / max;
-
             
+            
+            r.drawGrid(160, 80, 620, 10, 80, 10, "#fff");
+            labels3.push(r.text(80, 85, "Average Stress Score").attr(txt2));
+
             r.drawGrid(leftgutter + X * .5 + .5, topgutter + .5, width - leftgutter - X, height - topgutter - bottomgutter, 10, 10, "#000");
             var path = r.path().attr({stroke: color, "stroke-width": 4, "stroke-linejoin": "round"}),
                 bgp = r.path().attr({stroke: "none", opacity: .3, fill: color}),
@@ -225,7 +229,7 @@ class MainHandler(webapp2.RequestHandler):
                         lx = label[0].transform()[0][1] + ppp.dx;
                         ly = label[0].transform()[0][2] + ppp.dy;
                         frame.show().stop().animate(anim);
-                        label[0].attr({text: data + " %"}).show().stop().animateWith(frame, anim, {transform: ["t", lx, ly]}, 200 * is_label_visible);
+                        label[0].attr({text: "Total Stress " + data + " "}).show().stop().animateWith(frame, anim, {transform: ["t", lx, ly]}, 200 * is_label_visible);
                         label[1].attr({text: lbl}).show().stop().animateWith(frame, anim, {transform: ["t", lx, ly]}, 200 * is_label_visible);
                         dot.attr("r", 6);
                         is_label_visible = true;
@@ -271,7 +275,7 @@ rect.a {
 
 <div class="navbar navbar-inverse">
   <div class="navbar-inner">
-    <a class="brand" href="#">Title</a>
+    <a class="brand" href="#">Buzz</a>
     <ul class="nav">
       <li class="active"><a href="#">Home</a></li>
       <li><a href="/connect">Login</a></li>
@@ -284,8 +288,7 @@ rect.a {
 
   <div class="table well span12">
     <div id="gauge" style="display: block; margin: 0 auto; width:400px; height:320px"></div>
-    <div style="width: 800px; margin-top: 50px;  margin: 0 auto; height: 200px;">
-      <div id="song-gauge" style="position: relative; float: left; width:200px; height:160px"></div>  
+    <div style="width: 600px; margin-top: 50px;  margin: 0 auto; height: 200px;">
       <div id="sleep-gauge" style="position: relative; float: left;width:200px; height:160px"></div> 
       <div id="activity-gauge" style="position: relative; float: left; width:200px; height:160px"></div> 
       <div id="calendar-gauge" style="position: relative; float: left; width:200px; height:160px"></div>
@@ -294,24 +297,28 @@ rect.a {
 
   <div class="row">
     <div class="span6" style="margin-left: 40px;"">
-    <h4>Your Daily Event Stress Score: 92%</h4>
+    <h4>Your Daily Event Stress Score:</h4>
       <ul>
-        <li>Exams: 3 scheduled today from 2PM-5PM</li>
-        <li>Meetings: 2 Group Meetings today from 6PM-8PM</li>
+        <li>Exams: <strong>(3)</strong> scheduled today from 2PM - 5PM</li>
+        <li>Meetings: <strong>(2)</strong> group Meetings today from 6PM - 8PM</li>
+        <li>Classes: <strong>(5)</strong> classes today from 10AM - 4PM</li>
       </ul>
     </div>
     <div class="span5">
-    <h4>Your Music Score: 92%</h4>
+    <h4>Your Music Score:</h4>
+      <p>Hi Alex Stelea, you listened to your usual song types.</p>
+      <p>Based on your browse history, here is some recommended music to help you unwind:</p>
       <ul>
-        <li>You listened to your old songs</li>
-        <li>Here is some suggested music to help you rewind:</li>
+        <li><a href="#">That's My Name</a> - Akcent</li>
+        <li><a href="#">I Feel Better</a> - Hot Chip</li>
+        <li><a href="#">Mirros</a> - Justin Timberlake</li>
+
       </ul>
     </div>
   </div>
 
   <div class="span12">
 
-      <p> Stress is very very very very very very very very very bad </p>
   </div>
 
   <div class="graph-container">
@@ -327,7 +334,7 @@ rect.a {
                     <tbody>
                         <tr>
                             <td>75.06</td>
-                            <td>79.76</td>
+                            <td>50.76</td>
                             <td>81.71</td>
                         </tr>
                     </tbody>
@@ -336,86 +343,40 @@ rect.a {
                 <div id="holder"></div>
                 </div>
 </div>
+
+
+<div style="margin-top: 60px"></div>
 </body>
 
 
 <script type="text/javascript">
 
            
- var lastfm = new LastFM({
-      apiKey    : '641fb60a2b735363bbc1159bf090156c',
-      apiSecret : 'faa27263fe6eed36d8c89f808b4c5473',
-    });
-  
-
-  lastfm.user.getRecentTracks({user: 'alexstelea'},
-    {success: function(data){
-    console.log(data.recenttracks.track[0].name);
-  }, error: function(code, message){
-    console.log(code)
-  }});
-
-  lastfm.artist.getInfo({artist: 'Drake'}, {success: function(data){
-    console.log(data);
-  }, error: function(code, message){
-    console.log(code)
-  }});
-
-lastfm.user.getInfo({user: 'alexstelea'}, {success: function(data){
-    console.log(data);
-  }, error: function(code, message){
-    console.log(code)
-  }});
-
+ 
 var max = 0;
 
 move_score = function(data) {
   if (data['move_cnt'] == 0) {
     return 0;
   }
-  return data['steps']/data['move_cnt'];
+  return (data['steps']/data['move_cnt']/100).toFixed(0);
 }
 
 sleep_score = function(data) {
 
-  a = 25920/3600; 
 
-  h = data['sleep'] / 3600;
+  return (data['sleep_main']['quality'] - Math.pow(data['sleep_main']['awakenings'],3)).toFixed(0);
 
-  s = 200;
-
-  mh = (h-a)/s;
-
-  if (mh < 0){
-    mh= Math.abs(mh);
-  }
-  else{
-    mh = 0.25 * mh;
-
-  whenSleptAvg = 82800;
-  timeSlept = 36000;
-  stdT = 200;
-  mT = (timeSlept - whenSleptAvg)/stdT;
-
-
-  /*sleepEff = (data['sleep_main']['light'] + data['sleep_main']['deep'] ) /(data['sleep_main']['light'] + data['sleep_main']['deep'] + data['sleep_main']['awake']; */
-  avgSleepEff = .903;
-  sleepEffNight = .98;
-  stdD= 200
-  mD = (sleepEfNight - avgSleepEff)/stdD
-
-  finalScore = mh + mT + mD
-
-  }
 }
 
-musicscore = function(data){
-  
+final_score = function(data){
+  return ((calendar_score(data) + move_score(data) + sleep_score(data))/14000).toFixed(0);
 }
 
 calendar_score = function(data){
-  return 30;
+  return (85-(sleep_score(data)/10) + (move_score(data)/10)).toFixed(0);
 }
+
 
 
 
@@ -426,19 +387,13 @@ $.get('/teamscore?tid='+tid, function(data) {
   
   var g = new JustGage({
     id: "gauge", 
-    value: 50, 
+    value: final_score(data), 
     min: 0,
     max: 100,
     title: "Stress Score"
   }); 
 
-  var g = new JustGage({
-      id: "song-gauge", 
-      value: 40, 
-      min: 0,
-      max: 100,
-      title: "Music Score"
-    });  
+
   var g = new JustGage({
       id: "sleep-gauge", 
       value: sleep_score(data), 
@@ -448,7 +403,7 @@ $.get('/teamscore?tid='+tid, function(data) {
     });  
   var g = new JustGage({
       id: "activity-gauge", 
-      value: 74, 
+      value: move_score(data), 
       min: 0,
       max: 100,
       title: "Activity Score"
@@ -465,16 +420,6 @@ $.get('/teamscore?tid='+tid, function(data) {
 
 }
 
-animate_bar = function(sel) {
-  var score = $(sel).data('score');
-
-  if (max == 0) {
-    return;
-  }
-
-  
-  $(sel).animate({ height: (score/max*300)  }, 600);
-}
 
 $(document).ready(function() {
   
@@ -507,10 +452,11 @@ class TeamScoreHandler(MainHandler):
         move_cnt = 0
         steps_total = 0
         sleeps_total = 0
+        sleep_main = 0;
         try:
           up_sleep = up.read(token, 'users/@me/sleeps')
           sleeps_total = up_sleep['data']['items'][0]['details']['duration']
-          sleep_main = up_sleep['data']['items'][0]['details'],
+          sleep_main = up_sleep['data']['items'][0]['details']
 
 
         except:
@@ -698,8 +644,10 @@ class ConnectHandler(MainHandler):
 <div class="container">
 
       <form action="" class="form-signin">
+        <h2 style="text-align: center">Welcome to Buzz</h3>
 
-        <button class="btn btn-large btn-primary" type="submit"><a style="color: white" href="%s">Login</a></button>
+        <h5 style="text-align: center">Connect to Jawbone</h5>
+        <button style="margin-left: 110px;" class="btn btn-large btn-primary" type="submit"><a style="color: white" href="%s">Login</a></button>
         
       </form>
     </div>
@@ -733,7 +681,7 @@ class AuthorizeHandler(MainHandler):
         entity = key.get()
         
         self.response.headers.add_header('Set-Cookie', 'token=%s' % ct)
-        self.redirect('/team')
+        self.redirect('/')
 
 class SignoutHandler(MainHandler):
 
