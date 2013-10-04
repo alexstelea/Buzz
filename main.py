@@ -23,7 +23,6 @@ import json
 from google.appengine.ext import ndb
 
 # tools for encryption
-
 app_name = "Buzz"
 
 # your keys go here
@@ -32,13 +31,32 @@ app_config = {
     'UP_API_CLIENT_ID': "krS_McZKM9M",
     'UP_API_SECRET': "48e15085df4a81f292ebef0a33bf91deb0bb4d6f",
 }
+class CalendarModel(ndb.Model):
+  pass
 
+class StressModel(ndb.Model):
+  """ Stress Model """
+
+  sid = ndb.IntegerProperty()
+  score = ndb.IntegerProperty()
+  activity = ndb.IntegerProperty()
+  sleep = ndb.IntegerProperty()
+  calendar = ndb.IntegerProperty()
+  date = ndb.DateTimeProperty(auto_now_add=True)
+
+    
 class UserModel(ndb.Model):
     """ Models a User """
     tid   = ndb.IntegerProperty()
     xid   = ndb.StringProperty()
     token = ndb.StringProperty()
     date = ndb.DateTimeProperty(auto_now_add=True)
+    avg_stress_score = ndb.IntegerProperty()
+    stress_scores = ndb.StringProperty()
+
+    @classmethod
+    def query_score(cls, avg_stress_score):
+      return UserModel.query(UserModel.avg_stress_score == avg_stress_score).order(-UserModel.data)
 
     @classmethod
     def query_team(cls, tid):
@@ -63,40 +81,34 @@ class MainHandler(webapp2.RequestHandler):
         return token
 
     def _user(self, xid=None):
-
-        if (xid):
-            users = UserModel.query_xid(xid).fetch(1)
-        else:
-            token = self._token()
-            users = UserModel.query_token(token).fetch(1)
-        
-        if users and users[0]:
-            return users[0]
-        
-        return None
+      if (xid):
+          users = UserModel.query_xid(xid).fetch(1)
+      else:
+          token = self._token()
+          users = UserModel.query_token(token).fetch(1)
+      
+      if users and users[0]:
+          return users[0]
+      
+      return None
 
     def _myhost(self):
-        return self.request
+      return self.request
 
     def get(self):
 
-        self.response.headers['Content-Type'] = 'text/html'
-
-        self.response.write('''
+      self.response.headers['Content-Type'] = 'text/html'
+      self.response.write('''
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
   <link href="/stylesheets/main.css" media="screen" rel="stylesheet" type="text/css"/>
   <link href="/stylesheets/bootstrap.css" rel="stylesheet">
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js" ></script>
-<script type="text/javascript" src="http://www.google.com/jsapi"></script>
-
-  <script src="/js/lastfm.js"></script>
-  <script src="/js/lastfm.api.md5.js"></script>
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
 
   <script src="js/raphael.js"></script>
   <script src="js/justgage.1.0.1.min.js"></script>
-
   <script src="js/popup.js"></script>
 
   <script>
@@ -295,27 +307,6 @@ rect.a {
     </div>
   </div>
 
-  <div class="row">
-    <div class="span6" style="margin-left: 40px;"">
-    <h4>Your Daily Event Stress Score:</h4>
-      <ul>
-        <li>Exams: <strong>(3)</strong> scheduled today from 2PM - 5PM</li>
-        <li>Meetings: <strong>(2)</strong> group Meetings today from 6PM - 8PM</li>
-        <li>Classes: <strong>(5)</strong> classes today from 10AM - 4PM</li>
-      </ul>
-    </div>
-    <div class="span5">
-    <h4>Your Music Score:</h4>
-      <p>Hi Alex Stelea, you listened to your usual song types.</p>
-      <p>Based on your browse history, here is some recommended music to help you unwind:</p>
-      <ul>
-        <li><a href="#">That's My Name</a> - Akcent</li>
-        <li><a href="#">I Feel Better</a> - Hot Chip</li>
-        <li><a href="#">Mirros</a> - Justin Timberlake</li>
-
-      </ul>
-    </div>
-  </div>
 
   <div class="span12">
 
@@ -370,7 +361,7 @@ sleep_score = function(data) {
 }
 
 final_score = function(data){
-  return ((calendar_score(data) + move_score(data) + sleep_score(data))/14000).toFixed(0);
+  return (calendar_score(data) + move_score(data) + sleep_score(data)).toFixed(0);
 }
 
 calendar_score = function(data){
@@ -384,7 +375,6 @@ fetch_team = function(tid) {
 
 $.get('/teamscore?tid='+tid, function(data) {
 
-  
   var g = new JustGage({
     id: "gauge", 
     value: final_score(data), 
@@ -393,7 +383,6 @@ $.get('/teamscore?tid='+tid, function(data) {
     title: "Stress Score"
   }); 
 
-
   var g = new JustGage({
       id: "sleep-gauge", 
       value: sleep_score(data), 
@@ -401,13 +390,15 @@ $.get('/teamscore?tid='+tid, function(data) {
       max: 100,
       title: "Sleep Score"
     });  
+
   var g = new JustGage({
       id: "activity-gauge", 
       value: move_score(data), 
       min: 0,
       max: 100,
       title: "Activity Score"
-    });  
+    });
+
   var g = new JustGage({
       id: "calendar-gauge", 
       value: calendar_score(data), 
@@ -420,16 +411,12 @@ $.get('/teamscore?tid='+tid, function(data) {
 
 }
 
-
 $(document).ready(function() {
   
   fetch_team('XkPN_Wb3hGwgc7ZHX4ErSQ');
   
 
 });
-
-
-
 
 </script>
 
@@ -457,7 +444,6 @@ class TeamScoreHandler(MainHandler):
           up_sleep = up.read(token, 'users/@me/sleeps')
           sleeps_total = up_sleep['data']['items'][0]['details']['duration']
           sleep_main = up_sleep['data']['items'][0]['details']
-
 
         except:
           logging.error('could not fetch sleep for user %s' % user)
@@ -587,10 +573,6 @@ class TeamChooseHandler(MainHandler):
         return
 
 
-class ConnectLastFM(MainHandler):
-  def get(self):
-    pass
-
 class ConnectHandler(MainHandler):
 
     def get(self):
@@ -669,13 +651,11 @@ class AuthorizeHandler(MainHandler):
         xid = up_user['data']['xid']
         user = self._user(xid=xid)
 
-
         if user:
             user.token = ct
         else:
-            user = UserModel(xid=xid,
+          user = UserModel(xid=xid,
                              token=ct)
-
         key = user.put()
         ndb.get_context().clear_cache()
         entity = key.get()
@@ -689,8 +669,6 @@ class SignoutHandler(MainHandler):
 
         self.response.headers.add_header('Set-Cookie', 'token=')
         self.redirect('/team')
-
-
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
